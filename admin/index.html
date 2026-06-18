@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (CDN) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
@@ -217,17 +217,16 @@
 
     <script>
         // =============================================
-        // 🔥 FIREBASE KONFIGURATSIYASI
+        // 🔥 FIREBASE KONFIGURATSIYASI (SIZNING MA'LUMOTLAR)
         // =============================================
         
-        // Firebase Console dan olingan ma'lumotlar
         const firebaseConfig = {
-            apiKey: "AIzaSyB4Rr0xKp0Vq4q7q8q9q0q1q2q3q4q5q6q7q8",
-            authDomain: "kinotop-9a8b7.firebaseapp.com",
-            projectId: "kinotop-9a8b7",
-            storageBucket: "kinotop-9a8b7.firebasestorage.app",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef1234567890"
+            apiKey: "AIzaSyCoMOdXHWuI7APp4XgQ6ym3CsEOdpV44_c",
+            authDomain: "kinotop-cef65.firebaseapp.com",
+            projectId: "kinotop-cef65",
+            storageBucket: "kinotop-cef65.firebasestorage.app",
+            messagingSenderId: "34137489356",
+            appId: "1:34137489356:web:247ca6374ec7418ee5a769"
         };
 
         // Firebase ni ishga tushirish
@@ -655,6 +654,7 @@
                 showToast(`✅ ${videos.length} ta video yuklandi!`, 'success');
                 console.log('🎬 KinoTop yuklandi! Jami:', videos.length, 'ta video');
                 console.log('🔥 Firebase ga ulandi!');
+                console.log('📁 Project:', firebaseConfig.projectId);
             } catch (error) {
                 console.error('Init error:', error);
                 showToast('❌ Xatolik yuz berdi!', 'error');
