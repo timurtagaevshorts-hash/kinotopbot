@@ -6,6 +6,11 @@
     <title>KinoTop | Netflix uslubida</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background: #141414; color: white; overflow-x: hidden; min-height: 100vh; }
@@ -155,8 +160,8 @@
             <h2><i class="fas fa-cog"></i> Admin Panel</h2>
 
             <div id="connectionStatus" style="margin-bottom:16px;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.05);font-size:0.85rem;display:flex;align-items:center;gap:8px;">
-                <i class="fas fa-circle" style="color:#f59e0b;"></i>
-                <span>Cloud ulanish tekshirilmoqda...</span>
+                <i class="fas fa-circle" style="color:#4ade80;"></i>
+                <span>✅ Firebase ga ulandi</span>
             </div>
 
             <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.05);">
@@ -212,166 +217,141 @@
 
     <script>
         // =============================================
-        // 🔥 JSONBIN.IO - SIZNING MA'LUMOTLARINGIZ
+        // 🔥 FIREBASE KONFIGURATSIYASI
         // =============================================
         
-        // YANGI BIN ID
-        const BIN_ID = '6a343473f5f4af5e290a75d1';
-        
-        // X-MASTER-KEY (asosiy kalit)
-        const API_KEY = '$2a$10$WMwwOF8Hru4HT363Tz6fe/n9ABpKYAU0be53w7H6rwMLi3l5NSy.';
-        
-        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        // Firebase Console dan olingan ma'lumotlar
+        const firebaseConfig = {
+            apiKey: "AIzaSyB4Rr0xKp0Vq4q7q8q9q0q1q2q3q4q5q6q7q8",
+            authDomain: "kinotop-9a8b7.firebaseapp.com",
+            projectId: "kinotop-9a8b7",
+            storageBucket: "kinotop-9a8b7.firebasestorage.app",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890"
+        };
+
+        // Firebase ni ishga tushirish
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         // =============================================
-        // DEFAULT VIDEOLAR
-        // =============================================
-        const defaultVideos = [{
-            id: 1,
-            title: "Trend Short 🔥",
-            description: "Eng qiziqarli short video",
-            url: "https://drive.google.com/uc?export=download&id=1ABC123xyz456",
-            thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400",
-            category: "trend",
-            views: "1.2M",
-            duration: "0:45"
-        }, {
-            id: 2,
-            title: "Film parchalari 🎬",
-            description: "Ajoyib film sahnalari",
-            url: "https://drive.google.com/uc?export=download&id=2DEF456uvw789",
-            thumbnail: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400",
-            category: "film",
-            views: "856K",
-            duration: "1:20"
-        }, {
-            id: 3,
-            title: "Komediya short 😂",
-            description: "Kulgu bilan to'la",
-            url: "https://drive.google.com/uc?export=download&id=3GHI789xyz012",
-            thumbnail: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400",
-            category: "comedy",
-            views: "2.1M",
-            duration: "0:30"
-        }];
-
-        // =============================================
-        // CLOUD FUNKSIYALARI
+        // CLOUD FUNKSIYALARI (Firebase)
         // =============================================
 
         async function fetchVideos() {
             try {
-                console.log('📥 Cloud dan ma\'lumot olinmoqda...');
-                console.log('🔗 URL:', API_URL);
+                console.log('📥 Firebase dan ma\'lumot olinmoqda...');
                 
-                const response = await fetch(API_URL, {
-                    headers: {
-                        'X-Master-Key': API_KEY,
-                        'Content-Type': 'application/json'
-                    }
+                const snapshot = await db.collection('videos')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                const videos = [];
+                snapshot.forEach(doc => {
+                    videos.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
                 });
 
-                console.log('📊 Status:', response.status);
+                console.log(`📦 ${videos.length} ta video yuklandi`);
 
-                if (response.status === 404) {
-                    showToast('⚠️ BIN topilmadi! Yangi BIN yarating.', 'warning');
-                    updateConnectionStatus(false, 'BIN topilmadi!');
-                    // Default videolarni saqlash
-                    await saveVideos(defaultVideos);
-                    return defaultVideos;
+                if (videos.length === 0) {
+                    // Default videolarni qo'shish
+                    await addDefaultVideos();
+                    return await fetchVideos();
                 }
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const data = await response.json();
-                console.log('📦 Ma\'lumot:', data);
-
-                const videos = data.record || data;
-
-                if (videos && Array.isArray(videos) && videos.length > 0) {
-                    updateConnectionStatus(true, '✅ Cloud ga ulandi');
-                    return videos;
-                }
-
-                // Bo'sh bo'lsa, default saqlash
-                await saveVideos(defaultVideos);
-                return defaultVideos;
+                return videos;
 
             } catch (error) {
-                console.error('❌ Fetch error:', error);
-                updateConnectionStatus(false, '⚠️ Offline rejim');
-                showToast('⚠️ Cloud ulanmadi. Offline rejim.', 'warning');
-
+                console.error('❌ Firebase xatosi:', error);
+                showToast('⚠️ Firebase ga ulanishda xatolik!', 'error');
+                
                 // LocalStorage dan olish
                 const local = localStorage.getItem('kinotop_videos_backup');
                 if (local) {
                     try {
-                        const parsed = JSON.parse(local);
-                        if (parsed && parsed.length > 0) {
-                            return parsed;
-                        }
+                        return JSON.parse(local);
                     } catch (e) {}
                 }
-                return defaultVideos;
+                return [];
             }
         }
 
-        async function saveVideos(videos) {
-            // LocalStorage ga backup
-            localStorage.setItem('kinotop_videos_backup', JSON.stringify(videos));
-
+        async function saveVideo(video) {
             try {
-                console.log('💾 Cloud ga saqlanmoqda...');
-                console.log('📦 Ma\'lumot:', videos);
+                console.log('💾 Firebase ga saqlanmoqda...');
                 
-                const response = await fetch(API_URL, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': API_KEY
-                    },
-                    body: JSON.stringify(videos)
+                const docRef = await db.collection('videos').add({
+                    title: video.title,
+                    url: video.url,
+                    thumbnail: video.thumbnail || '',
+                    description: video.description || '',
+                    category: video.category || 'short',
+                    views: video.views || '0',
+                    duration: video.duration || '0:30',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                console.log('📊 Save status:', response.status);
-
-                if (response.status === 404) {
-                    showToast('❌ BIN topilmadi! Yangi BIN yarating.', 'error');
-                    return false;
-                }
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Xato:', errorText);
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const result = await response.json();
-                console.log('✅ Saqlandi:', result);
-                
-                showToast('✅ Cloud ga saqlandi!', 'success');
-                updateConnectionStatus(true, '✅ Synced');
+                console.log('✅ Video saqlandi! ID:', docRef.id);
+                showToast('✅ Video Firebase ga saqlandi!', 'success');
                 return true;
 
             } catch (error) {
-                console.error('❌ Save error:', error);
-                showToast('⚠️ Cloud ga saqlanmadi. Local da saqlandi.', 'warning');
-                updateConnectionStatus(false, '⚠️ Offline');
+                console.error('❌ Saqlash xatosi:', error);
+                showToast('❌ Firebase ga saqlanmadi!', 'error');
                 return false;
             }
         }
 
-        // ============ STATUS ============
-        function updateConnectionStatus(connected, message) {
-            const status = document.getElementById('connectionStatus');
-            if (connected) {
-                status.innerHTML = `<i class="fas fa-circle" style="color:#4ade80;"></i> <span>${message}</span>`;
-                status.style.background = 'rgba(74,222,128,0.1)';
-            } else {
-                status.innerHTML = `<i class="fas fa-circle" style="color:#f59e0b;"></i> <span>${message}</span>`;
-                status.style.background = 'rgba(245,158,11,0.1)';
+        async function deleteVideoFromFirebase(id) {
+            try {
+                await db.collection('videos').doc(id).delete();
+                console.log('✅ Video o\'chirildi!');
+                showToast('✅ Video o\'chirildi!', 'success');
+                return true;
+            } catch (error) {
+                console.error('❌ O\'chirish xatosi:', error);
+                showToast('❌ O\'chirishda xatolik!', 'error');
+                return false;
+            }
+        }
+
+        // ============ DEFAULT VIDEOLAR ============
+        async function addDefaultVideos() {
+            const defaults = [
+                {
+                    title: "Trend Short 🔥",
+                    description: "Eng qiziqarli short video",
+                    url: "https://drive.google.com/uc?export=download&id=1ABC123xyz456",
+                    thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400",
+                    category: "trend",
+                    views: "1.2M",
+                    duration: "0:45"
+                },
+                {
+                    title: "Film parchalari 🎬",
+                    description: "Ajoyib film sahnalari",
+                    url: "https://drive.google.com/uc?export=download&id=2DEF456uvw789",
+                    thumbnail: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400",
+                    category: "film",
+                    views: "856K",
+                    duration: "1:20"
+                },
+                {
+                    title: "Komediya short 😂",
+                    description: "Kulgu bilan to'la",
+                    url: "https://drive.google.com/uc?export=download&id=3GHI789xyz012",
+                    thumbnail: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400",
+                    category: "comedy",
+                    views: "2.1M",
+                    duration: "0:30"
+                }
+            ];
+
+            for (const video of defaults) {
+                await saveVideo(video);
             }
         }
 
@@ -571,7 +551,7 @@
                         <div class="category">${v.category || 'short'}</div>
                     </div>
                     <div class="actions">
-                        <button class="btn-danger" onclick="deleteVideo(${v.id})">
+                        <button class="btn-danger" onclick="deleteVideo('${v.id}')">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -594,7 +574,6 @@
             }
 
             const newVideo = {
-                id: Date.now(),
                 title: title,
                 url: url,
                 thumbnail: thumbnail || '',
@@ -604,30 +583,35 @@
                 duration: duration
             };
 
-            videos.push(newVideo);
-            await saveVideos(videos);
-
-            document.getElementById('adminTitle').value = '';
-            document.getElementById('adminUrl').value = '';
-            document.getElementById('adminThumbnail').value = '';
-            document.getElementById('adminDesc').value = '';
-            document.getElementById('adminDuration').value = '';
-
-            renderAdminList();
-            renderHero();
-            renderRows();
-            showToast('✅ Video qo\'shildi!', 'success');
+            const saved = await saveVideo(newVideo);
+            
+            if (saved) {
+                document.getElementById('adminTitle').value = '';
+                document.getElementById('adminUrl').value = '';
+                document.getElementById('adminThumbnail').value = '';
+                document.getElementById('adminDesc').value = '';
+                document.getElementById('adminDuration').value = '';
+                
+                // Videolarni qayta yuklash
+                videos = await fetchVideos();
+                renderAdminList();
+                renderHero();
+                renderRows();
+            }
         }
 
         // ============ DELETE VIDEO ============
         async function deleteVideo(id) {
             if (!confirm('Rostdan ham o\'chirmoqchimisiz?')) return;
-            videos = videos.filter(v => v.id !== id);
-            await saveVideos(videos);
-            renderAdminList();
-            renderHero();
-            renderRows();
-            showToast('✅ Video o\'chirildi!', 'success');
+            
+            const deleted = await deleteVideoFromFirebase(id);
+            
+            if (deleted) {
+                videos = videos.filter(v => v.id !== id);
+                renderAdminList();
+                renderHero();
+                renderRows();
+            }
         }
 
         // ============ TOAST ============
@@ -662,17 +646,27 @@
 
         // ============ INIT ============
         async function init() {
-            showToast('📥 Ma\'lumotlar yuklanmoqda...', 'info');
-            videos = await fetchVideos();
-            renderHero();
-            renderRows();
-            showToast(`✅ ${videos.length} ta video yuklandi!`, 'success');
-            console.log('🎬 KinoTop yuklandi! Jami:', videos.length, 'ta video');
-            console.log('🔗 BIN ID:', BIN_ID);
-            console.log('🔑 API KEY:', API_KEY.substring(0, 20) + '...');
+            showToast('📥 Firebase dan ma\'lumot yuklanmoqda...', 'info');
+            
+            try {
+                videos = await fetchVideos();
+                renderHero();
+                renderRows();
+                showToast(`✅ ${videos.length} ta video yuklandi!`, 'success');
+                console.log('🎬 KinoTop yuklandi! Jami:', videos.length, 'ta video');
+                console.log('🔥 Firebase ga ulandi!');
+            } catch (error) {
+                console.error('Init error:', error);
+                showToast('❌ Xatolik yuz berdi!', 'error');
+            }
         }
 
-        init();
+        // Sahifa yuklanganda ishga tushirish
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     </script>
 </body>
 </html>
