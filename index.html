@@ -76,7 +76,6 @@
             border: 1px solid rgba(229, 9, 20, 0.2);
             cursor: pointer;
             transition: 0.2s;
-            text-decoration: none;
         }
         .logo-sub:hover {
             background: rgba(229, 9, 20, 0.25);
@@ -787,7 +786,7 @@
         <div class="header-top">
             <div class="logo-area">
                 <div class="logo">🎬 KinoTop</div>
-                <div class="logo-sub" onclick="downloadAPK()">
+                <div class="logo-sub" onclick="sendDownloadCommand()">
                     <i class="fas fa-star"></i>
                     <span>Dastur orqali ko'proq kino, serial va shortlarni ko'ring - bepul</span>
                 </div>
@@ -809,11 +808,7 @@
             <div class="loading-text" id="loadingBanner">⏳ Filmlar yuklanmoqda...</div>
             <div class="hero-btns">
                 <button class="btn btn-white" onclick="showAppModal()">⚡ Shorts</button>
-                <button class="btn btn-red" onclick="downloadAPK()">📥 Ilovani yuklash</button>
-            </div>
-            <div class="download-progress" id="downloadProgress">
-                <div class="text">⏳ Yuklanmoqda...</div>
-                <div class="bar"><div class="fill" id="progressFill"></div></div>
+                <button class="btn btn-red" onclick="sendDownloadCommand()">📥 Ilovani yuklash</button>
             </div>
             <div style="margin-top:6px;font-size:0.55rem;color:#444">
                 📹 <span id="totalVideos">0</span> | 👥 <span id="visitorCount">0</span>
@@ -844,7 +839,7 @@
                 <button class="btn-main btn-continue-telegram" onclick="continueInTelegram()">
                     <i class="fab fa-telegram-plane"></i> Telegram orqali davom etish
                 </button>
-                <button class="btn-main btn-install-app" onclick="downloadAPK()">
+                <button class="btn-main btn-install-app" onclick="sendDownloadCommand()">
                     <i class="fas fa-download"></i> Dasturni o'rnatish
                 </button>
                 <button class="btn-close-video" onclick="closeVideoModal()">Bekor qilish</button>
@@ -890,7 +885,7 @@
                 </div>
             </div>
             <div class="app-modal-footer">
-                <button class="btn-install" onclick="downloadAPK()">
+                <button class="btn-install" onclick="sendDownloadCommand()">
                     <i class="fas fa-download"></i> Dasturni o'rnatish
                 </button>
                 <button class="btn-close-text" onclick="closeAppModal()">Yopish</button>
@@ -960,55 +955,33 @@
         const tg = window.Telegram?.WebApp;
         if (tg) { tg.ready(); tg.expand() }
 
-        // ============ APK YUKLASH ============
-        // APK fayl index.html bilan bir papkada bo'lishi kerak
-        const APK_FILE = 'kinotop.apk';
+        // ============ BOT USERNAME ============
+        const BOT_USERNAME = 'Kodlikino_topbot';
 
-        function downloadAPK() {
-            // Joriy sayt manzilini olish
-            const baseUrl = window.location.origin + window.location.pathname;
-            const apkUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1) + APK_FILE;
-            
-            // Yuklab olish progressini ko'rsatish
-            const progressEl = document.getElementById('downloadProgress');
-            const fillEl = document.getElementById('progressFill');
-            progressEl.classList.add('show');
-            fillEl.style.width = '0%';
-            
-            // Progressni simulyatsiya qilish
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 15;
-                if (progress > 90) {
-                    clearInterval(interval);
-                    fillEl.style.width = '90%';
-                } else {
-                    fillEl.style.width = progress + '%';
-                }
-            }, 200);
-            
-            // Yuklab olishni boshlash
-            const link = document.createElement('a');
-            link.href = apkUrl;
-            link.download = 'KinoTop.apk';
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Progressni yakunlash
-            setTimeout(() => {
-                fillEl.style.width = '100%';
-                setTimeout(() => {
-                    progressEl.classList.remove('show');
-                    fillEl.style.width = '0%';
-                    toast('✅ Yuklab olish boshlandi!', 'ok');
-                }, 1000);
-            }, 3000);
-            
-            // Modalarni yopish
+        // ============ BOTGA /download BUYRUQ YUBORISH ============
+        function sendDownloadCommand() {
+            // Barcha modalarni yopish
             closeVideoModal();
             closeAppModal();
+            
+            // Botga /download buyrug'ini yuborish
+            const url = `https://t.me/${BOT_USERNAME}?start=download`;
+            
+            if (tg) {
+                // Telegram WebApp ichida
+                try {
+                    tg.openTelegramLink(url);
+                    toast('📥 Botga /download buyrug\'i yuborildi!', 'ok');
+                } catch(e) {
+                    // Agar tg.openTelegramLink ishlamasa
+                    window.open(url, '_blank');
+                    toast('📥 Bot ochilmoqda...', 'ok');
+                }
+            } else {
+                // Brauzerda
+                window.open(url, '_blank');
+                toast('📥 Botga /download buyrug\'i yuborildi!', 'ok');
+            }
         }
 
         // ============ FIREBASE ============
@@ -1124,7 +1097,16 @@
 
         function continueInTelegram() {
             if (pendingMovieUrl) {
-                window.open(pendingMovieUrl, '_system');
+                // Telegram ichida - tashqi brauzerda ochish
+                if (tg) {
+                    try {
+                        tg.openLink(pendingMovieUrl);
+                    } catch(e) {
+                        window.open(pendingMovieUrl, '_blank');
+                    }
+                } else {
+                    window.open(pendingMovieUrl, '_system');
+                }
             } else {
                 toast('❌ Video URL topilmadi!', 'err');
             }
