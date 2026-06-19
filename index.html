@@ -1,1 +1,360 @@
-yhtyhry
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, maximum-scale=1.0, minimum-scale=1.0">
+    <title>KinoTop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root{--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        html,body{width:100%;height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:#000;color:#fff}
+        
+        .header{position:fixed;top:0;left:0;right:0;z-index:100;padding:8px 12px;padding-top:calc(8px + var(--safe-top));background:rgba(0,0,0,0.95);backdrop-filter:blur(10px)}
+        .header-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+        .logo-area{display:flex;align-items:center;gap:10px;flex-shrink:0}
+        .logo{font-size:1.3rem;font-weight:900;color:#e50914;white-space:nowrap}
+        .logo-sub{display:flex;align-items:center;gap:4px;background:linear-gradient(90deg,rgba(229,9,20,0.2),rgba(255,45,85,0.2));padding:4px 10px;border-radius:20px;border:1px solid rgba(229,9,20,0.3)}
+        .logo-sub i{font-size:0.6rem;color:#ffd93d;animation:sparkle 1.5s infinite}
+        @keyframes sparkle{0%,100%{opacity:1}50%{opacity:0.3}}
+        .logo-sub span{font-size:0.55rem;color:#ff9800;font-weight:600;white-space:nowrap}
+        
+        .header-nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+        .header-nav a,.nav-btn{color:#aaa;text-decoration:none;font-size:0.6rem;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:4px;transition:.2s;border:none;background:none;white-space:nowrap}
+        .nav-btn.active,.header-nav a.active{color:#fff;background:rgba(255,255,255,0.1)}
+        .shorts-btn{background:#e50914!important;color:#fff!important;padding:5px 8px!important;border-radius:14px!important;font-weight:700!important;font-size:0.6rem!important}
+        .admin-badge{cursor:pointer;font-size:0.75rem;padding:2px 4px;color:#888}
+
+        #mainPage{width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:56px;padding-top:calc(56px + var(--safe-top));scrollbar-width:none}
+        #mainPage::-webkit-scrollbar{display:none}
+        .hero{padding:24px 14px;background:linear-gradient(135deg,#1a1a2e,#0d0d1a)}
+        .hero h1{font-size:1.4rem;font-weight:900;margin-bottom:2px}
+        .hero .subtitle{font-size:0.65rem;color:#999;margin-bottom:8px}
+        
+        .loading-text{text-align:center;padding:6px;margin:6px 0;background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#ff6b6b);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 2s linear infinite;font-weight:700;font-size:0.75rem}
+        @keyframes shimmer{0%{background-position:0% center}100%{background-position:200% center}}
+        
+        .hero-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+        .btn{padding:8px 14px;border-radius:6px;font-weight:700;font-size:0.7rem;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;text-decoration:none;transition:.2s}
+        .btn:active{transform:scale(0.96)}
+        .btn-white{background:#fff;color:#000}
+        .btn-red{background:#e50914;color:#fff}
+        .row-section{padding:10px}
+        .row-title{font-size:0.9rem;font-weight:700;margin-bottom:6px}
+        .movie-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:5px}
+        .movie-card{border-radius:7px;overflow:hidden;background:#1a1a2e;cursor:pointer;transition:.2s;aspect-ratio:2/3;position:relative}
+        .movie-card:active{transform:scale(0.97)}
+        .movie-card img{width:100%;height:100%;object-fit:cover}
+        .movie-card .info{position:absolute;bottom:0;left:0;right:0;padding:20px 5px 5px;background:linear-gradient(transparent,rgba(0,0,0,0.95))}
+        .movie-card .info .t{font-size:0.65rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .movie-card .play-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.8rem;opacity:0.9;text-shadow:0 0 20px rgba(0,0,0,0.8)}
+        .badge{position:absolute;top:4px;left:4px;background:#e50914;padding:1px 4px;border-radius:2px;font-size:0.45rem;font-weight:700}
+
+        .app-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.93);z-index:250;display:none;align-items:center;justify-content:center;padding:20px}
+        .app-modal-overlay.show{display:flex}
+        .app-modal{background:linear-gradient(160deg,#0d0d1a 0%,#1a1a2e 50%,#0d0d1a 100%);border-radius:24px;padding:0;max-width:400px;width:100%;text-align:center;border:1px solid rgba(229,9,20,0.2);box-shadow:0 0 60px rgba(229,9,20,0.1);overflow:hidden}
+        .app-modal-header{background:linear-gradient(135deg,#e50914,#ff2d55);padding:32px 20px 24px}
+        .app-modal-header .icon-circle{width:70px;height:70px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto 12px;border:3px solid rgba(255,255,255,0.2)}
+        .app-modal-header h2{font-size:1.4rem;font-weight:900;color:#fff;margin-bottom:4px}
+        .app-modal-header .brand{font-size:0.8rem;color:rgba(255,255,255,0.8);font-weight:500}
+        .app-modal-body{padding:24px 20px}
+        .app-modal-body .tagline{font-size:0.85rem;color:#ccc;line-height:1.6;margin-bottom:20px;font-weight:500}
+        .app-modal-body .tagline span{color:#ff9800;font-weight:700}
+        .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+        .feature-box{background:rgba(255,255,255,0.04);border-radius:12px;padding:14px 10px;text-align:center;border:1px solid rgba(255,255,255,0.06)}
+        .feature-box i{font-size:1.5rem;margin-bottom:6px;display:block}
+        .feature-box .ft{font-size:0.7rem;font-weight:600;color:#ddd}
+        .feature-box .fs{font-size:0.55rem;color:#888;margin-top:2px}
+        .feature-box:nth-child(1) i{color:#ff6b6b}
+        .feature-box:nth-child(2) i{color:#ffd93d}
+        .feature-box:nth-child(3) i{color:#6bcb77}
+        .feature-box:nth-child(4) i{color:#4d96ff}
+        .app-modal-footer{padding:0 20px 24px}
+        .btn-install{display:block;width:100%;padding:16px;background:linear-gradient(135deg,#e50914,#ff2d55);border:none;border-radius:14px;color:#fff;font-weight:800;font-size:0.9rem;cursor:pointer;text-decoration:none;box-shadow:0 10px 40px rgba(229,9,20,0.35);transition:.3s}
+        .btn-install:active{transform:scale(0.97)}
+        .btn-install i{margin-right:8px}
+        .btn-close-text{display:block;width:100%;padding:12px;background:none;border:none;color:#666;font-size:0.7rem;cursor:pointer;margin-top:8px}
+
+        .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:300;display:none;align-items:center;justify-content:center;padding:14px}
+        .modal.show{display:flex}
+        .modal-box{background:#1a1a2e;border-radius:12px;padding:18px;max-width:380px;width:100%;max-height:85vh;overflow-y:auto;border:1px solid rgba(255,255,255,0.1)}
+        .modal-box h2{font-size:0.95rem;margin-bottom:8px}
+        .modal-box h3{font-size:0.75rem;margin-bottom:5px;color:#aaa}
+        .input{width:100%;padding:8px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#fff;font-size:0.75rem;margin-bottom:5px}
+        .input:focus{outline:none;border-color:#667eea}
+        .btn-full{width:100%;padding:9px;background:linear-gradient(135deg,#667eea,#764ba2);border:none;border-radius:6px;color:#fff;font-weight:700;font-size:0.75rem;cursor:pointer;margin-top:3px}
+        .btn-full.red{background:linear-gradient(135deg,#ff2d55,#e50914)}
+        .btn-sm{background:#dc3545;color:#fff;border:none;padding:3px 6px;border-radius:3px;cursor:pointer;font-size:0.6rem}
+        .stats{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px}
+        .stat{background:rgba(255,255,255,0.05);border-radius:7px;padding:8px;text-align:center}
+        .stat .v{font-size:1rem;font-weight:900;color:#667eea}
+        .stat .l{font-size:0.5rem;color:#999;margin-top:1px}
+        .list-item{display:flex;align-items:center;gap:5px;padding:4px 5px;background:rgba(255,255,255,0.03);border-radius:4px;margin-bottom:2px;font-size:0.65rem}
+        .list-item .txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+        .toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);padding:8px 16px;border-radius:6px;color:#fff;font-weight:600;z-index:500;animation:up .3s;text-align:center;max-width:90%;font-size:0.7rem;pointer-events:none}
+        .toast-ok{background:#4ade80;color:#000}
+        .toast-err{background:#ef4444}
+        @keyframes up{from{transform:translate(-50%,30px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+
+        @media(min-width:768px){.movie-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
+        @media(max-width:360px){.logo-sub span{font-size:0.45rem}.logo{font-size:1.1rem}}
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-top">
+            <div class="logo-area">
+                <div class="logo">🎬 KinoTop</div>
+                <a href="https://t.me/Kodlikino_topbot" target="_blank" class="logo-sub">
+                    <i class="fas fa-star"></i>
+                    <span>To'liq imkoniyatlar dasturda • Bepul</span>
+                </a>
+            </div>
+            <div class="header-nav">
+                <a href="#" class="active" onclick="showMain()">🏠 Bosh</a>
+                <a href="#" onclick="showMain();filterVideos('film')">🎬 Film</a>
+                <a href="#" onclick="showMain();filterVideos('serial')">📺 Serial</a>
+                <button class="nav-btn shorts-btn" onclick="showAppModal()">⚡ Shorts</button>
+                <button class="admin-badge" onclick="showAdminLogin()">🔐</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN PAGE -->
+    <div id="mainPage">
+        <div class="hero">
+            <h1 id="heroTitle">KinoTop</h1>
+            <p class="subtitle" id="heroDesc">Eng yangi premyeralar, qiziqarli kino va seriallar!</p>
+            <div class="loading-text" id="loadingBanner">⏳ Barcha filmlar HD va 4K formatda • Iltimos biroz kuting, filmlar yuklanmoqda...</div>
+            <div class="hero-btns">
+                <button class="btn btn-white" onclick="showAppModal()">⚡ Shorts</button>
+                <a href="https://t.me/Kodlikino_topbot" target="_blank" class="btn btn-red">📥 Ilovani o'rnatish</a>
+            </div>
+            <div style="margin-top:8px;font-size:0.6rem;color:#555">
+                📹 <span id="totalVideos">0</span> | 👥 <span id="visitorCount">0</span>
+            </div>
+        </div>
+        <div class="row-section" id="moviesGrid"></div>
+    </div>
+
+    <!-- DASTUR O'RNATISH MODAL -->
+    <div class="app-modal-overlay" id="appModal">
+        <div class="app-modal">
+            <div class="app-modal-header">
+                <div class="icon-circle">🎬</div>
+                <h2>KinoTop</h2>
+                <div class="brand">Barcha imkoniyatlar dasturda!</div>
+            </div>
+            <div class="app-modal-body">
+                <p class="tagline">
+                    <span>Eng yangi premyeralar</span>, qiziqarli kino va seriallar, 
+                    TikTok uslubidagi <span>qiziqarli shorts videolarni</span> ko'rish 
+                    uchun dasturni o'rnatib oling va <span>to'liq qulaylikni his qiling!</span>
+                </p>
+                <div class="feature-grid">
+                    <div class="feature-box">
+                        <i class="fas fa-star"></i>
+                        <div class="ft">Eng yangi premyeralar</div>
+                        <div class="fs">Birinchi bo'lib ko'ring</div>
+                    </div>
+                    <div class="feature-box">
+                        <i class="fas fa-film"></i>
+                        <div class="ft">Kino va seriallar</div>
+                        <div class="fs">HD / 4K formatda</div>
+                    </div>
+                    <div class="feature-box">
+                        <i class="fas fa-bolt"></i>
+                        <div class="ft">TikTok uslubi</div>
+                        <div class="fs">Qiziqarli shorts</div>
+                    </div>
+                    <div class="feature-box">
+                        <i class="fas fa-crown"></i>
+                        <div class="ft">To'liq qulaylik</div>
+                        <div class="fs">Barchasi bepul</div>
+                    </div>
+                </div>
+            </div>
+            <div class="app-modal-footer">
+                <a href="https://t.me/Kodlikino_topbot" target="_blank" class="btn-install">
+                    <i class="fas fa-download"></i> 📥 Dasturni o'rnatib olish
+                </a>
+                <button class="btn-close-text" onclick="closeAppModal()">Yopish</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN -->
+    <div class="modal" id="loginModal">
+        <div class="modal-box">
+            <h2>🔐 Admin kirish</h2>
+            <input type="password" class="input" id="adminPass" placeholder="Parol">
+            <button class="btn-full" onclick="loginAdmin()">Kirish</button>
+            <button style="width:100%;padding:5px;background:none;border:none;color:#666;margin-top:3px;cursor:pointer;font-size:0.65rem" onclick="closeModal('loginModal')">Bekor qilish</button>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div class="modal" id="adminPanel">
+        <div class="modal-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <h2>📊 Admin Panel</h2>
+                <button style="background:none;border:none;color:#fff;font-size:1rem;cursor:pointer" onclick="closeModal('adminPanel')">✕</button>
+            </div>
+            <div class="stats">
+                <div class="stat"><div class="v" id="sVisitors">0</div><div class="l">👥 Tashriflar</div></div>
+                <div class="stat"><div class="v" id="sVideos">0</div><div class="l">📹 Kinolar</div></div>
+                <div class="stat"><div class="v" id="sShorts">0</div><div class="l">⚡ Shortslar</div></div>
+                <div class="stat"><div class="v" id="sViews">0</div><div class="l">👁 Ko'rishlar</div></div>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:6px;margin-bottom:6px">
+                <h3>📹 Kino yuklash</h3>
+                <input class="input" id="mTitle" placeholder="Kino nomi">
+                <input class="input" id="mUrl" placeholder="Google Drive URL">
+                <input class="input" id="mThumb" placeholder="Rasm URL">
+                <select class="input" id="mCat"><option value="film">🎬 Film</option><option value="serial">📺 Serial</option><option value="trend">📈 Trend</option></select>
+                <button class="btn-full" onclick="addMovie()">📹 Kino qo'shish</button>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:6px;margin-bottom:6px">
+                <h3>⚡ Shorts yuklash</h3>
+                <input class="input" id="sTitle" placeholder="Shorts nomi">
+                <input class="input" id="sUrl" placeholder="Video URL (MP4)">
+                <button class="btn-full red" onclick="addShort()">⚡ Shorts qo'shish</button>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:6px">
+                <h3>📋 Kinolar</h3>
+                <div id="adminMovieList" style="max-height:130px;overflow-y:auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastBox"></div>
+
+    <script>
+        const tg=window.Telegram?.WebApp;
+        if(tg){tg.ready();tg.expand()}
+
+        firebase.initializeApp({
+            apiKey:"AIzaSyCoMOdXHWuI7APp4XgQ6ym3CsEOdpV44_c",
+            authDomain:"kinotop-cef65.firebaseapp.com",
+            projectId:"kinotop-cef65",
+            storageBucket:"kinotop-cef65.firebasestorage.app",
+            messagingSenderId:"34137489356",
+            appId:"1:34137489356:web:247ca6374ec7418ee5a769"
+        });
+        const db=firebase.firestore();
+        const PASS='Betmilion1';
+
+        let movies=[],shorts=[],currentFilter='all';
+
+        async function loadAll(){
+            try{
+                const[ms,ss,v]=await Promise.all([
+                    db.collection('videos').get(),
+                    db.collection('shorts').get(),
+                    db.collection('stats').doc('visitors').get()
+                ]);
+                movies=[];ms.forEach(d=>movies.push({id:d.id,...d.data()}));
+                movies.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+                shorts=[];ss.forEach(d=>shorts.push({id:d.id,...d.data()}));
+                document.getElementById('visitorCount').textContent=v.exists?(v.data().count||0):0;
+                document.getElementById('totalVideos').textContent=movies.length;
+                document.getElementById('loadingBanner').style.display=movies.length>0?'none':'block';
+                renderMovies();
+            }catch(e){console.error(e)}
+        }
+
+        async function incVisitor(){
+            try{
+                const ref=db.collection('stats').doc('visitors');
+                await db.runTransaction(async t=>{
+                    const d=await t.get(ref);
+                    d.exists?t.update(ref,{count:firebase.firestore.FieldValue.increment(1)}):t.set(ref,{count:1});
+                });
+            }catch(e){}
+        }
+
+        function renderMovies(){
+            const grid=document.getElementById('moviesGrid');
+            const filtered=currentFilter==='all'?movies:movies.filter(m=>m.category===currentFilter);
+            document.getElementById('loadingBanner').style.display=movies.length>0?'none':'block';
+            if(!filtered.length){grid.innerHTML='<div style="text-align:center;padding:40px;color:#555">📭 Video topilmadi</div>';return}
+            const cats=[...new Set(filtered.map(m=>m.category||'film'))];
+            grid.innerHTML=cats.map(cat=>{
+                const items=filtered.filter(m=>(m.category||'film')===cat);
+                const label={film:'🎬 Filmlar (HD/4K)',serial:'📺 Seriallar (HD/4K)',trend:'📈 Trend (HD/4K)'}[cat]||cat;
+                return `<div style="margin-bottom:12px">
+                    <div class="row-title">${label}</div>
+                    <div class="movie-grid">${items.map(m=>`
+                        <div class="movie-card" onclick="openMovie('${m.id}')">
+                            <img src="${m.thumbnail||'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400'}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400'">
+                            <div class="play-icon">▶</div>
+                            <div class="info"><div class="t">${m.title||''}</div></div>
+                            ${cat==='trend'?'<div class="badge">🔥</div>':''}
+                        </div>`).join('')}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function filterVideos(cat){currentFilter=cat;renderMovies();document.getElementById('mainPage').scrollTop=0}
+        function openMovie(id){
+            const m=movies.find(x=>x.id===id);
+            if(!m?.url){toast('❌ URL topilmadi!','err');return}
+            window.open(getDriveUrl(m.url),'_system');
+            db.collection('videos').doc(id).update({views:firebase.firestore.FieldValue.increment(1)}).catch(()=>{});
+        }
+        function getDriveUrl(url){
+            if(!url)return'';
+            if(url.includes('drive.google.com/file/d/')){const id=url.split('/file/d/')[1]?.split('/')[0];return`https://drive.google.com/uc?export=download&id=${id}&confirm=no_antivirus`}
+            if(url.includes('drive.google.com/open?id=')){const id=url.split('open?id=')[1]?.split('&')[0];return`https://drive.google.com/uc?export=download&id=${id}&confirm=no_antivirus`}
+            return url;
+        }
+
+        function showAppModal(){document.getElementById('appModal').classList.add('show')}
+        function closeAppModal(){document.getElementById('appModal').classList.remove('show')}
+        function showMain(){currentFilter='all';renderMovies();document.getElementById('mainPage').style.display=''}
+        function closeModal(id){document.getElementById(id).classList.remove('show')}
+
+        function showAdminLogin(){document.getElementById('loginModal').classList.add('show')}
+        function loginAdmin(){
+            if(document.getElementById('adminPass').value===PASS){
+                document.getElementById('loginModal').classList.remove('show');
+                document.getElementById('adminPass').value='';
+                openAdmin();
+            }else{toast('❌ Noto\'g\'ri parol!','err')}
+        }
+        async function openAdmin(){
+            document.getElementById('adminPanel').classList.add('show');
+            try{const v=await db.collection('stats').doc('visitors').get();document.getElementById('sVisitors').textContent=v.exists?(v.data().count||0):0;document.getElementById('sVideos').textContent=movies.length;document.getElementById('sShorts').textContent=shorts.length;let tv=0;movies.forEach(m=>tv+=parseInt(m.views||0));shorts.forEach(s=>tv+=(s.views||0));document.getElementById('sViews').textContent=formatNum(tv)}catch(e){}
+            renderAdminMovies();
+        }
+        function renderAdminMovies(){
+            const el=document.getElementById('adminMovieList');
+            if(!movies.length){el.innerHTML='<div style="color:#555;text-align:center;padding:6px">Video yo\'q</div>';return}
+            el.innerHTML=movies.map(m=>`<div class="list-item"><span class="txt">${m.title||'Nomsiz'}</span><button class="btn-sm" onclick="deleteMovie('${m.id}')">🗑</button></div>`).join('')
+        }
+        async function addMovie(){
+            const t=document.getElementById('mTitle').value.trim(),u=document.getElementById('mUrl').value.trim();
+            if(!t||!u){toast('❌ Nomi va URL majburiy!','err');return}
+            try{await db.collection('videos').add({title:t,url:u,thumbnail:document.getElementById('mThumb').value.trim(),category:document.getElementById('mCat').value,views:'0',createdAt:firebase.firestore.FieldValue.serverTimestamp()});['mTitle','mUrl','mThumb'].forEach(id=>document.getElementById(id).value='');const ms=await db.collection('videos').get();movies=[];ms.forEach(d=>movies.push({id:d.id,...d.data()}));movies.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));renderMovies();renderAdminMovies();document.getElementById('totalVideos').textContent=movies.length;document.getElementById('sVideos').textContent=movies.length;document.getElementById('loadingBanner').style.display='none';toast('✅ Kino qo\'shildi!','ok')}catch(e){toast('❌ Xatolik!','err')}
+        }
+        async function addShort(){
+            const t=document.getElementById('sTitle').value.trim(),u=document.getElementById('sUrl').value.trim();
+            if(!t||!u){toast('❌ Nomi va URL majburiy!','err');return}
+            try{await db.collection('shorts').add({title:t,url:u,views:0,likes:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});['sTitle','sUrl'].forEach(id=>document.getElementById(id).value='');const ss=await db.collection('shorts').get();shorts=[];ss.forEach(d=>shorts.push({id:d.id,...d.data()}));document.getElementById('sShorts').textContent=shorts.length;toast('✅ Shorts qo\'shildi!','ok')}catch(e){toast('❌ Xatolik!','err')}
+        }
+        async function deleteMovie(id){if(!confirm('O\'chirilsinmi?'))return;await db.collection('videos').doc(id).delete();movies=movies.filter(m=>m.id!==id);renderMovies();renderAdminMovies();document.getElementById('totalVideos').textContent=movies.length;document.getElementById('sVideos').textContent=movies.length;toast('🗑 O\'chirildi','ok')}
+
+        function formatNum(n){if(!n)return'0';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return String(n)}
+        function toast(msg,type){const t=document.createElement('div');t.className=`toast toast-${type}`;t.textContent=msg;document.getElementById('toastBox').appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},2000)}
+
+        document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('loginModal');closeModal('adminPanel');closeAppModal()}});
+        incVisitor().then(()=>loadAll());
+    </script>
+</body>
+</html>
