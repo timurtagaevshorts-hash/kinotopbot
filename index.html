@@ -766,7 +766,7 @@
         <div class="header-top">
             <div class="logo-area">
                 <div class="logo">🎬 KinoTop</div>
-                <div class="logo-sub" onclick="sendDownloadCommand()">
+                <div class="logo-sub" onclick="openBotDownload()">
                     <i class="fas fa-star"></i>
                     <span>Dastur orqali ko'proq kino, serial va shortlarni ko'ring - bepul</span>
                 </div>
@@ -788,7 +788,7 @@
             <div class="loading-text" id="loadingBanner">⏳ Filmlar yuklanmoqda...</div>
             <div class="hero-btns">
                 <button class="btn btn-white" onclick="showAppModal()">⚡ Shorts</button>
-                <button class="btn btn-red" onclick="sendDownloadCommand()">📥 Ilova</button>
+                <button class="btn btn-red" onclick="openBotDownload()">📥 Ilova</button>
             </div>
             <div style="margin-top:6px;font-size:0.55rem;color:#444">
                 📹 <span id="totalVideos">0</span> | 👥 <span id="visitorCount">0</span>
@@ -819,7 +819,7 @@
                 <button class="btn-main btn-continue-telegram" onclick="continueInTelegram()">
                     <i class="fab fa-telegram-plane"></i> Telegram orqali davom etish
                 </button>
-                <button class="btn-main btn-install-app" onclick="sendDownloadCommand()">
+                <button class="btn-main btn-install-app" onclick="openBotDownload()">
                     <i class="fas fa-download"></i> Dasturni o'rnatish
                 </button>
                 <button class="btn-close-video" onclick="closeVideoModal()">Bekor qilish</button>
@@ -865,7 +865,7 @@
                 </div>
             </div>
             <div class="app-modal-footer">
-                <button class="btn-install" onclick="sendDownloadCommand()">
+                <button class="btn-install" onclick="openBotDownload()">
                     <i class="fas fa-download"></i> Dasturni o'rnatish
                 </button>
                 <button class="btn-close-text" onclick="closeAppModal()">Yopish</button>
@@ -935,9 +935,37 @@
         const tg = window.Telegram?.WebApp;
         if (tg) { tg.ready(); tg.expand() }
 
-        // BOT USERNAME - o'zgartirishingiz mumkin
+        // ============ BOT SOZLAMALARI ============
         const BOT_USERNAME = 'Kodlikino_topbot';
-        const BOT_LINK = `https://t.me/${BOT_USERNAME}`;
+        
+        // ============ ASOSIY FUNKSIYA: BOTNI OCHISH ============
+        function openBotDownload() {
+            // Botni /download buyrug'i bilan ochish
+            // Bu usul botdagi "Dasturni yuklash" tugmasini ishga tushiradi
+            const url = `https://t.me/${BOT_USERNAME}?start=download`;
+            
+            if (tg) {
+                // Telegram WebApp ichida
+                tg.openTelegramLink(url);
+            } else {
+                // Brauzerda
+                window.open(url, '_blank');
+            }
+            
+            // Modalarni yopish
+            closeVideoModal();
+            closeAppModal();
+        }
+
+        // ============ QO'SHIMCHA: BOTNI ODDIY OCHISH ============
+        function openBot() {
+            const url = `https://t.me/${BOT_USERNAME}`;
+            if (tg) {
+                tg.openTelegramLink(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        }
 
         firebase.initializeApp({
             apiKey: "AIzaSyCoMOdXHWuI7APp4XgQ6ym3CsEOdpV44_c",
@@ -953,42 +981,6 @@
         let adminPassword = '';
         let pendingMovieUrl = '';
         let pendingMovieTitle = '';
-
-        // ============ BOTGA /download BUYRUQNI YUBORISH ============
-        function sendDownloadCommand() {
-            // Telegram'da botga /download buyrug'ini yuborish
-            const url = `https://t.me/${BOT_USERNAME}?start=download`;
-            // yoki oddiy /download
-            // const url = `https://t.me/${BOT_USERNAME}?text=/download`;
-            
-            if (tg) {
-                // Telegram WebApp ichida
-                tg.openTelegramLink(url);
-            } else {
-                // Brauzerda
-                window.open(url, '_blank');
-            }
-            
-            // Qisqa toast xabar
-            toast('📥 Botga /download buyrug\'i yuborildi!', 'ok');
-            
-            // Agar video modal ochiq bo'lsa, uni yopamiz
-            closeVideoModal();
-            closeAppModal();
-        }
-
-        // ============ BOTGA HAVOLA ORQALI O'TISH ============
-        function openBotWithCommand(command) {
-            const url = `https://t.me/${BOT_USERNAME}?start=${command}`;
-            if (tg) {
-                tg.openTelegramLink(url);
-            } else {
-                window.open(url, '_blank');
-            }
-        }
-
-        // ============ BARCHA "DASTURNI O'RNATISH" TUGMALARI ============
-        // Endi barcha tugmalar sendDownloadCommand() ni chaqiradi
 
         async function loadPassword() {
             try {
