@@ -17,6 +17,8 @@
             --primary-dark: #b20710;
             --bg-dark: #0a0a0a;
             --bg-card: #141414;
+            --blue: #0088cc;
+            --blue-dark: #006699;
         }
         * {
             margin: 0;
@@ -33,7 +35,7 @@
             color: #fff;
         }
         
-        /* HEADER - Optimallashtirilgan */
+        /* HEADER */
         .header {
             position: fixed;
             top: 0;
@@ -73,13 +75,23 @@
             padding: 3px 8px;
             border-radius: 12px;
             border: 1px solid rgba(229, 9, 20, 0.2);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .logo-sub:hover {
+            background: rgba(229, 9, 20, 0.25);
         }
         .logo-sub i {
             font-size: 0.5rem;
             color: #ffd93d;
+            animation: sparkle 1.5s infinite;
+        }
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
         .logo-sub span {
-            font-size: 0.5rem;
+            font-size: 0.45rem;
             color: #ff9800;
             font-weight: 600;
             white-space: nowrap;
@@ -283,7 +295,139 @@
             font-weight: 700;
         }
 
-        /* MODALLAR */
+        /* VIDEO PLAYER MODAL */
+        .video-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 400;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .video-modal-overlay.show {
+            display: flex;
+        }
+        .video-modal {
+            max-width: 500px;
+            width: 100%;
+            background: linear-gradient(160deg, #0d0d0d, #1a1a1a);
+            border-radius: 20px;
+            padding: 30px 24px 24px;
+            text-align: center;
+            border: 1px solid rgba(229, 9, 20, 0.15);
+            box-shadow: 0 0 60px rgba(229, 9, 20, 0.05);
+            animation: modalPop 0.3s ease;
+        }
+        @keyframes modalPop {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .video-modal .icon-big {
+            font-size: 3.5rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .video-modal h2 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+        .video-modal .message {
+            font-size: 0.8rem;
+            color: #bbb;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+        .video-modal .message span {
+            color: #ff9800;
+            font-weight: 700;
+        }
+        .video-modal .highlight {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .video-modal .highlight .emoji-big {
+            font-size: 1.8rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .video-modal .highlight .text {
+            font-size: 0.7rem;
+            color: #888;
+            font-weight: 500;
+        }
+        .video-modal .highlight .text strong {
+            color: #fff;
+        }
+        .video-modal .highlight .text .highlight-text {
+            color: #ff9800;
+            font-weight: 700;
+        }
+        .video-modal .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .video-modal .btn-group .btn-main {
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .video-modal .btn-group .btn-main:active {
+            transform: scale(0.97);
+        }
+        /* Telegram tugmasi - ko'k rang */
+        .btn-continue-telegram {
+            background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+            color: #fff;
+            box-shadow: 0 8px 30px rgba(0, 136, 204, 0.3);
+        }
+        .btn-continue-telegram:hover {
+            box-shadow: 0 8px 40px rgba(0, 136, 204, 0.5);
+        }
+        /* Dasturni o'rnatish - qizil rang, pastda */
+        .btn-install-app {
+            background: linear-gradient(135deg, var(--primary), #ff2d55);
+            color: #fff;
+            box-shadow: 0 8px 30px rgba(229, 9, 20, 0.3);
+        }
+        .btn-install-app:hover {
+            box-shadow: 0 8px 40px rgba(229, 9, 20, 0.5);
+        }
+        .btn-close-video {
+            background: none;
+            border: none;
+            color: #555;
+            font-size: 0.65rem;
+            cursor: pointer;
+            padding: 8px;
+            margin-top: 4px;
+            transition: 0.2s;
+        }
+        .btn-close-video:hover {
+            color: #888;
+        }
+
+        /* APP MODAL */
         .app-modal-overlay {
             position: fixed;
             top: 0;
@@ -576,7 +720,6 @@
             to { transform: translate(-50%, 0); opacity: 1; }
         }
 
-        /* ADMIN - parol o'zgartirish */
         .password-section {
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             padding-top: 8px;
@@ -626,7 +769,7 @@
                 <div class="logo">🎬 KinoTop</div>
                 <a href="https://t.me/Kodlikino_topbot" target="_blank" class="logo-sub">
                     <i class="fas fa-star"></i>
-                    <span>Dasturda bepul</span>
+                    <span>Dastur orqali ko'proq kino, serial va shortlarni ko'ring - bepul</span>
                 </a>
             </div>
             <div class="header-nav">
@@ -653,6 +796,38 @@
             </div>
         </div>
         <div class="row-section" id="moviesGrid"></div>
+    </div>
+
+    <!-- VIDEO PLAYER MODAL -->
+    <div class="video-modal-overlay" id="videoModal">
+        <div class="video-modal">
+            <span class="icon-big">🎬</span>
+            <h2 id="videoModalTitle">KinoTop ilovasida davom eting!</h2>
+            <div class="message">
+                Ba'zi Telegram versiyalarida <span>video to'liq ko'rinmasligi</span> yoki 
+                <span>to'liq ekran rejimi ishlamasligi</span> mumkin.
+            </div>
+            <div class="highlight">
+                <span class="emoji-big">📱</span>
+                <div class="text">
+                    <strong>KinoTop ilovasini o'rnatib</strong><br>
+                    <span style="color:#999;">HD va 4K sifatlarda</span><br>
+                    <span class="highlight-text">200+ kino, serial va shortlarni</span><br>
+                    <span style="color:#999;">qulay va maroqli tomosha qiling!</span>
+                </div>
+            </div>
+            <div class="btn-group">
+                <!-- Telegram tugmasi - birinchi, ko'k rang -->
+                <button class="btn-main btn-continue-telegram" onclick="continueInTelegram()">
+                    <i class="fab fa-telegram-plane"></i> Telegram orqali davom etish
+                </button>
+                <!-- Dasturni o'rnatish - ikkinchi, pastda -->
+                <a href="https://t.me/Kodlikino_topbot" target="_blank" class="btn-main btn-install-app">
+                    <i class="fas fa-download"></i> Dasturni o'rnatish
+                </a>
+                <button class="btn-close-video" onclick="closeVideoModal()">Bekor qilish</button>
+            </div>
+        </div>
     </div>
 
     <!-- APP MODAL -->
@@ -742,7 +917,6 @@
                 <button class="btn-full red" onclick="addShort()">⚡ Shorts qo'shish</button>
             </div>
             
-            <!-- Parol o'zgartirish -->
             <div class="password-section">
                 <h3>🔑 Parolni o'zgartirish</h3>
                 <div class="input-group">
@@ -776,15 +950,15 @@
 
         let movies = [], shorts = [], currentFilter = 'all';
         let adminPassword = '';
+        let pendingMovieUrl = '';
+        let pendingMovieTitle = '';
 
-        // Parolni Firestore'dan o'qish
         async function loadPassword() {
             try {
                 const doc = await db.collection('config').doc('admin').get();
                 if (doc.exists) {
                     adminPassword = doc.data().password || 'Betmilion1';
                 } else {
-                    // Default parolni saqlash
                     await db.collection('config').doc('admin').set({ password: 'Betmilion1' });
                     adminPassword = 'Betmilion1';
                 }
@@ -853,8 +1027,37 @@
         function openMovie(id) {
             const m = movies.find(x => x.id === id);
             if (!m?.url) { toast('❌ URL topilmadi!', 'err'); return }
-            window.open(getDriveUrl(m.url), '_system');
+            
+            // Ko'rishlar sonini oshirish
             db.collection('videos').doc(id).update({ views: firebase.firestore.FieldValue.increment(1) }).catch(() => {});
+            
+            // Video URL va nomini saqlab qo'yamiz
+            pendingMovieUrl = getDriveUrl(m.url);
+            pendingMovieTitle = m.title || 'Kino';
+            
+            // Video modalni ko'rsatamiz
+            showVideoModal(pendingMovieTitle);
+        }
+
+        function showVideoModal(title) {
+            const titleEl = document.getElementById('videoModalTitle');
+            titleEl.textContent = `🎬 ${title}`;
+            document.getElementById('videoModal').classList.add('show');
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoModal').classList.remove('show');
+            pendingMovieUrl = '';
+            pendingMovieTitle = '';
+        }
+
+        function continueInTelegram() {
+            if (pendingMovieUrl) {
+                window.open(pendingMovieUrl, '_system');
+            } else {
+                toast('❌ Video URL topilmadi!', 'err');
+            }
+            closeVideoModal();
         }
         
         function getDriveUrl(url) {
@@ -888,7 +1091,6 @@
             }
         }
 
-        // Parolni o'zgartirish
         async function changePassword() {
             const newPass = document.getElementById('newPassword').value.trim();
             if (!newPass || newPass.length < 4) {
@@ -1012,6 +1214,7 @@
                 closeModal('loginModal');
                 closeModal('adminPanel');
                 closeAppModal();
+                closeVideoModal();
             }
         });
 
