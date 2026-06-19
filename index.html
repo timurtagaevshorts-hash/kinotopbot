@@ -75,8 +75,9 @@
             padding: 3px 8px;
             border-radius: 12px;
             border: 1px solid rgba(229, 9, 20, 0.2);
-            text-decoration: none;
+            cursor: pointer;
             transition: 0.2s;
+            text-decoration: none;
         }
         .logo-sub:hover {
             background: rgba(229, 9, 20, 0.25);
@@ -395,7 +396,6 @@
         .video-modal .btn-group .btn-main:active {
             transform: scale(0.97);
         }
-        /* Telegram tugmasi - ko'k rang */
         .btn-continue-telegram {
             background: linear-gradient(135deg, var(--blue), var(--blue-dark));
             color: #fff;
@@ -404,7 +404,6 @@
         .btn-continue-telegram:hover {
             box-shadow: 0 8px 40px rgba(0, 136, 204, 0.5);
         }
-        /* Dasturni o'rnatish - qizil rang, pastda */
         .btn-install-app {
             background: linear-gradient(135deg, var(--primary), #ff2d55);
             color: #fff;
@@ -767,10 +766,10 @@
         <div class="header-top">
             <div class="logo-area">
                 <div class="logo">🎬 KinoTop</div>
-                <a href="https://t.me/Kodlikino_topbot" target="_blank" class="logo-sub">
+                <div class="logo-sub" onclick="sendDownloadCommand()">
                     <i class="fas fa-star"></i>
                     <span>Dastur orqali ko'proq kino, serial va shortlarni ko'ring - bepul</span>
-                </a>
+                </div>
             </div>
             <div class="header-nav">
                 <a href="#" class="active" onclick="showMain()">🏠</a>
@@ -789,7 +788,7 @@
             <div class="loading-text" id="loadingBanner">⏳ Filmlar yuklanmoqda...</div>
             <div class="hero-btns">
                 <button class="btn btn-white" onclick="showAppModal()">⚡ Shorts</button>
-                <a href="https://t.me/Kodlikino_topbot" target="_blank" class="btn btn-red">📥 Ilova</a>
+                <button class="btn btn-red" onclick="sendDownloadCommand()">📥 Ilova</button>
             </div>
             <div style="margin-top:6px;font-size:0.55rem;color:#444">
                 📹 <span id="totalVideos">0</span> | 👥 <span id="visitorCount">0</span>
@@ -817,14 +816,12 @@
                 </div>
             </div>
             <div class="btn-group">
-                <!-- Telegram tugmasi - birinchi, ko'k rang -->
                 <button class="btn-main btn-continue-telegram" onclick="continueInTelegram()">
                     <i class="fab fa-telegram-plane"></i> Telegram orqali davom etish
                 </button>
-                <!-- Dasturni o'rnatish - ikkinchi, pastda -->
-                <a href="https://t.me/Kodlikino_topbot" target="_blank" class="btn-main btn-install-app">
+                <button class="btn-main btn-install-app" onclick="sendDownloadCommand()">
                     <i class="fas fa-download"></i> Dasturni o'rnatish
-                </a>
+                </button>
                 <button class="btn-close-video" onclick="closeVideoModal()">Bekor qilish</button>
             </div>
         </div>
@@ -868,9 +865,9 @@
                 </div>
             </div>
             <div class="app-modal-footer">
-                <a href="https://t.me/Kodlikino_topbot" target="_blank" class="btn-install">
+                <button class="btn-install" onclick="sendDownloadCommand()">
                     <i class="fas fa-download"></i> Dasturni o'rnatish
-                </a>
+                </button>
                 <button class="btn-close-text" onclick="closeAppModal()">Yopish</button>
             </div>
         </div>
@@ -938,6 +935,10 @@
         const tg = window.Telegram?.WebApp;
         if (tg) { tg.ready(); tg.expand() }
 
+        // BOT USERNAME - o'zgartirishingiz mumkin
+        const BOT_USERNAME = 'Kodlikino_topbot';
+        const BOT_LINK = `https://t.me/${BOT_USERNAME}`;
+
         firebase.initializeApp({
             apiKey: "AIzaSyCoMOdXHWuI7APp4XgQ6ym3CsEOdpV44_c",
             authDomain: "kinotop-cef65.firebaseapp.com",
@@ -952,6 +953,42 @@
         let adminPassword = '';
         let pendingMovieUrl = '';
         let pendingMovieTitle = '';
+
+        // ============ BOTGA /download BUYRUQNI YUBORISH ============
+        function sendDownloadCommand() {
+            // Telegram'da botga /download buyrug'ini yuborish
+            const url = `https://t.me/${BOT_USERNAME}?start=download`;
+            // yoki oddiy /download
+            // const url = `https://t.me/${BOT_USERNAME}?text=/download`;
+            
+            if (tg) {
+                // Telegram WebApp ichida
+                tg.openTelegramLink(url);
+            } else {
+                // Brauzerda
+                window.open(url, '_blank');
+            }
+            
+            // Qisqa toast xabar
+            toast('📥 Botga /download buyrug\'i yuborildi!', 'ok');
+            
+            // Agar video modal ochiq bo'lsa, uni yopamiz
+            closeVideoModal();
+            closeAppModal();
+        }
+
+        // ============ BOTGA HAVOLA ORQALI O'TISH ============
+        function openBotWithCommand(command) {
+            const url = `https://t.me/${BOT_USERNAME}?start=${command}`;
+            if (tg) {
+                tg.openTelegramLink(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+
+        // ============ BARCHA "DASTURNI O'RNATISH" TUGMALARI ============
+        // Endi barcha tugmalar sendDownloadCommand() ni chaqiradi
 
         async function loadPassword() {
             try {
@@ -1028,14 +1065,11 @@
             const m = movies.find(x => x.id === id);
             if (!m?.url) { toast('❌ URL topilmadi!', 'err'); return }
             
-            // Ko'rishlar sonini oshirish
             db.collection('videos').doc(id).update({ views: firebase.firestore.FieldValue.increment(1) }).catch(() => {});
             
-            // Video URL va nomini saqlab qo'yamiz
             pendingMovieUrl = getDriveUrl(m.url);
             pendingMovieTitle = m.title || 'Kino';
             
-            // Video modalni ko'rsatamiz
             showVideoModal(pendingMovieTitle);
         }
 
