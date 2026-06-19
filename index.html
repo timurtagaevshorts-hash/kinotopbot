@@ -35,7 +35,6 @@
             color: #fff;
         }
         
-        /* HEADER */
         .header {
             position: fixed;
             top: 0;
@@ -296,7 +295,6 @@
             font-weight: 700;
         }
 
-        /* VIDEO PLAYER MODAL */
         .video-modal-overlay {
             position: fixed;
             top: 0;
@@ -401,16 +399,10 @@
             color: #fff;
             box-shadow: 0 8px 30px rgba(0, 136, 204, 0.3);
         }
-        .btn-continue-telegram:hover {
-            box-shadow: 0 8px 40px rgba(0, 136, 204, 0.5);
-        }
         .btn-install-app {
             background: linear-gradient(135deg, var(--primary), #ff2d55);
             color: #fff;
             box-shadow: 0 8px 30px rgba(229, 9, 20, 0.3);
-        }
-        .btn-install-app:hover {
-            box-shadow: 0 8px 40px rgba(229, 9, 20, 0.5);
         }
         .btn-close-video {
             background: none;
@@ -426,7 +418,6 @@
             color: #888;
         }
 
-        /* APP MODAL */
         .app-modal-overlay {
             position: fixed;
             top: 0;
@@ -748,6 +739,36 @@
             white-space: nowrap;
         }
 
+        .download-progress {
+            display: none;
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .download-progress.show {
+            display: block;
+        }
+        .download-progress .bar {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .download-progress .bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #ff2d55);
+            width: 0%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+        .download-progress .text {
+            font-size: 0.6rem;
+            color: #888;
+        }
+
         @media (min-width: 768px) {
             .movie-grid {
                 grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -766,7 +787,7 @@
         <div class="header-top">
             <div class="logo-area">
                 <div class="logo">🎬 KinoTop</div>
-                <div class="logo-sub" onclick="openBotDownload()">
+                <div class="logo-sub" onclick="downloadAPK()">
                     <i class="fas fa-star"></i>
                     <span>Dastur orqali ko'proq kino, serial va shortlarni ko'ring - bepul</span>
                 </div>
@@ -788,7 +809,11 @@
             <div class="loading-text" id="loadingBanner">⏳ Filmlar yuklanmoqda...</div>
             <div class="hero-btns">
                 <button class="btn btn-white" onclick="showAppModal()">⚡ Shorts</button>
-                <button class="btn btn-red" onclick="openBotDownload()">📥 Ilova</button>
+                <button class="btn btn-red" onclick="downloadAPK()">📥 Ilovani yuklash</button>
+            </div>
+            <div class="download-progress" id="downloadProgress">
+                <div class="text">⏳ Yuklanmoqda...</div>
+                <div class="bar"><div class="fill" id="progressFill"></div></div>
             </div>
             <div style="margin-top:6px;font-size:0.55rem;color:#444">
                 📹 <span id="totalVideos">0</span> | 👥 <span id="visitorCount">0</span>
@@ -819,7 +844,7 @@
                 <button class="btn-main btn-continue-telegram" onclick="continueInTelegram()">
                     <i class="fab fa-telegram-plane"></i> Telegram orqali davom etish
                 </button>
-                <button class="btn-main btn-install-app" onclick="openBotDownload()">
+                <button class="btn-main btn-install-app" onclick="downloadAPK()">
                     <i class="fas fa-download"></i> Dasturni o'rnatish
                 </button>
                 <button class="btn-close-video" onclick="closeVideoModal()">Bekor qilish</button>
@@ -865,7 +890,7 @@
                 </div>
             </div>
             <div class="app-modal-footer">
-                <button class="btn-install" onclick="openBotDownload()">
+                <button class="btn-install" onclick="downloadAPK()">
                     <i class="fas fa-download"></i> Dasturni o'rnatish
                 </button>
                 <button class="btn-close-text" onclick="closeAppModal()">Yopish</button>
@@ -935,38 +960,58 @@
         const tg = window.Telegram?.WebApp;
         if (tg) { tg.ready(); tg.expand() }
 
-        // ============ BOT SOZLAMALARI ============
-        const BOT_USERNAME = 'Kodlikino_topbot';
-        
-        // ============ ASOSIY FUNKSIYA: BOTNI OCHISH ============
-        function openBotDownload() {
-            // Botni /download buyrug'i bilan ochish
-            // Bu usul botdagi "Dasturni yuklash" tugmasini ishga tushiradi
-            const url = `https://t.me/${BOT_USERNAME}?start=download`;
+        // ============ APK YUKLASH ============
+        // APK fayl index.html bilan bir papkada bo'lishi kerak
+        const APK_FILE = 'kinotop.apk';
+
+        function downloadAPK() {
+            // Joriy sayt manzilini olish
+            const baseUrl = window.location.origin + window.location.pathname;
+            const apkUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1) + APK_FILE;
             
-            if (tg) {
-                // Telegram WebApp ichida
-                tg.openTelegramLink(url);
-            } else {
-                // Brauzerda
-                window.open(url, '_blank');
-            }
+            // Yuklab olish progressini ko'rsatish
+            const progressEl = document.getElementById('downloadProgress');
+            const fillEl = document.getElementById('progressFill');
+            progressEl.classList.add('show');
+            fillEl.style.width = '0%';
+            
+            // Progressni simulyatsiya qilish
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) {
+                    clearInterval(interval);
+                    fillEl.style.width = '90%';
+                } else {
+                    fillEl.style.width = progress + '%';
+                }
+            }, 200);
+            
+            // Yuklab olishni boshlash
+            const link = document.createElement('a');
+            link.href = apkUrl;
+            link.download = 'KinoTop.apk';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Progressni yakunlash
+            setTimeout(() => {
+                fillEl.style.width = '100%';
+                setTimeout(() => {
+                    progressEl.classList.remove('show');
+                    fillEl.style.width = '0%';
+                    toast('✅ Yuklab olish boshlandi!', 'ok');
+                }, 1000);
+            }, 3000);
             
             // Modalarni yopish
             closeVideoModal();
             closeAppModal();
         }
 
-        // ============ QO'SHIMCHA: BOTNI ODDIY OCHISH ============
-        function openBot() {
-            const url = `https://t.me/${BOT_USERNAME}`;
-            if (tg) {
-                tg.openTelegramLink(url);
-            } else {
-                window.open(url, '_blank');
-            }
-        }
-
+        // ============ FIREBASE ============
         firebase.initializeApp({
             apiKey: "AIzaSyCoMOdXHWuI7APp4XgQ6ym3CsEOdpV44_c",
             authDomain: "kinotop-cef65.firebaseapp.com",
