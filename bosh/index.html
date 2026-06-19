@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KinoTop | Netflix uslubida</title>
+    <title>KinoTop | Eng sara filmlar va shortslar</title>
     <link rel="manifest" href="/static/manifest.json">
     <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
-    <meta name="theme-color" content="#e50914">
+    <meta name="theme-color" content="#667eea">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -19,10 +19,66 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #141414;
+            background: #0a0a1a;
             color: white;
             overflow-x: hidden;
             min-height: 100vh;
+        }
+
+        /* ============ BACKGROUND SLIDER ============ */
+        .bg-slider {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-slider .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            transform: scale(1.05);
+        }
+
+        .bg-slider .slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .bg-slider .slide::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(10, 10, 26, 0.85) 0%,
+                rgba(26, 10, 46, 0.75) 40%,
+                rgba(10, 26, 46, 0.65) 100%
+            );
+        }
+
+        /* ============ OVERLAY CONTENT ============ */
+        .overlay-content {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
         }
 
         /* ============ HEADER ============ */
@@ -32,908 +88,547 @@
             left: 0;
             right: 0;
             z-index: 100;
-            padding: 16px 30px;
+            padding: 16px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
-            transition: background 0.3s ease;
-        }
-
-        .header.scrolled {
-            background: rgba(20, 20, 20, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(10, 10, 26, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.6rem;
-            font-weight: 900;
-            color: #e50914;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: white;
             text-decoration: none;
         }
 
         .logo i {
-            font-size: 1.8rem;
+            color: #667eea;
+            font-size: 1.6rem;
         }
 
-        .header-nav {
+        .logo span {
+            background: linear-gradient(135deg, #fff, #b794f4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-btns {
             display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .header-nav a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .header-nav a:hover,
-        .header-nav a.active {
-            color: white;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .header-actions .search-btn {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .header-actions .search-btn:hover {
-            color: white;
-        }
-
-        .avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            cursor: pointer;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        /* ============ HERO BANNER ============ */
-        .hero {
-            position: relative;
-            height: 70vh;
-            min-height: 450px;
-            display: flex;
-            align-items: center;
-            padding: 0 60px;
-            margin-bottom: 20px;
-            background: #141414;
-            overflow: hidden;
-        }
-
-        .hero-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-size: cover;
-            background-position: center top;
-            opacity: 0.4;
-            transition: opacity 1s ease;
-        }
-
-        .hero-bg::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to right, rgba(20,20,20,0.9) 20%, transparent 80%);
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            max-width: 550px;
-        }
-
-        .hero-badge {
-            display: inline-block;
-            background: #e50914;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            letter-spacing: 1px;
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 12px;
-        }
-
-        .hero-desc {
-            font-size: 1.05rem;
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.6;
-            margin-bottom: 20px;
-            max-width: 450px;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn-hero {
-            padding: 12px 28px;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .header-btn {
+            padding: 8px 18px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
             text-decoration: none;
-        }
-
-        .btn-hero-primary {
-            background: white;
-            color: #141414;
-        }
-
-        .btn-hero-primary:hover {
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        .btn-hero-secondary {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-hero-secondary:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        .hero-meta {
-            display: flex;
-            gap: 20px;
-            margin-top: 16px;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .hero-meta span {
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        /* ============ ROWS ============ */
-        .rows-container {
-            padding: 0 30px 40px;
-        }
-
-        .row {
-            margin-bottom: 30px;
-        }
-
-        .row-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            padding: 0 10px;
-        }
-
-        .row-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .row-view-all {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.8rem;
-            text-decoration: none;
-            transition: color 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .row-view-all:hover {
+        .header-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.3);
             color: white;
         }
 
-        .row-scroll {
-            display: flex;
+        .header-btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: transparent;
+            color: white;
+        }
+
+        .header-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        /* ============ MAIN CONTENT ============ */
+        .main-content {
+            padding-top: 80px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
             gap: 8px;
-            overflow-x: auto;
-            padding: 8px 4px 12px;
-            scroll-behavior: smooth;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            color: #a8b5ff;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease;
         }
 
-        .row-scroll::-webkit-scrollbar {
-            display: none;
+        .badge i {
+            font-size: 0.6rem;
+            color: #4ade80;
         }
 
-        /* ============ MOVIE CARD ============ */
-        .movie-card {
-            flex: 0 0 200px;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
+        /* Title */
+        .main-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .main-title .highlight {
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-title .highlight-2 {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Subtitle */
+        .subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.6);
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+            animation: fadeInUp 1.2s ease;
+        }
+
+        .subtitle strong {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* Features */
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            animation: fadeInUp 1.4s ease;
+        }
+
+        .feature-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .feature-chip i {
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            animation: fadeInUp 1.6s ease;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 40px;
+            border-radius: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border: none;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: #1a1a2e;
-            aspect-ratio: 2 / 3;
+            text-decoration: none;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.35);
         }
 
-        .movie-card:hover {
-            transform: scale(1.05);
-            z-index: 10;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.5);
         }
 
-        .movie-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .btn-primary:active {
+            transform: scale(0.97);
         }
 
-        .movie-card .card-overlay {
-            position: absolute;
-            bottom: 0;
+        .btn-primary i {
+            font-size: 1.3rem;
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 30px;
+            border-radius: 60px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
+            animation: fadeInUp 1.8s ease;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 2px;
+        }
+
+        /* ============ ANIMATIONS ============ */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============ FLOATING PARTICLES ============ */
+        .particles {
+            position: fixed;
+            top: 0;
             left: 0;
             right: 0;
-            padding: 40px 12px 12px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .movie-card:hover .card-overlay {
-            opacity: 1;
-        }
-
-        .movie-card .card-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+            bottom: 0;
+            z-index: 0;
+            pointer-events: none;
             overflow: hidden;
         }
 
-        .movie-card .card-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 4px;
-        }
-
-        .movie-card .card-play {
+        .particle {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
+            width: 4px;
+            height: 4px;
+            background: rgba(102, 126, 234, 0.3);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.3rem;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            animation: floatParticle 20s infinite linear;
         }
 
-        .movie-card:hover .card-play {
-            opacity: 1;
-        }
-
-        .movie-card .card-badge {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #e50914;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.6rem;
-            font-weight: 700;
-        }
-
-        /* ============ LOADING ============ */
-        .loading-row {
-            display: flex;
-            gap: 8px;
-            padding: 8px 4px;
-        }
-
-        .loading-card {
-            flex: 0 0 200px;
-            aspect-ratio: 2 / 3;
-            border-radius: 8px;
-            background: linear-gradient(90deg, #1a1a2e 25%, #2a2a3e 50%, #1a1a2e 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: rgba(255, 255, 255, 0.3);
-            width: 100%;
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 16px;
-            opacity: 0.3;
-        }
-
-        .empty-state h3 {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 1.2rem;
-            margin-bottom: 8px;
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                transform: translateY(-10vh) rotate(720deg);
+                opacity: 0;
+            }
         }
 
         /* ============ RESPONSIVE ============ */
         @media (max-width: 768px) {
-            .hero {
-                height: 60vh;
-                min-height: 400px;
-                padding: 0 30px;
-            }
-            .hero-title {
+            .main-title {
                 font-size: 2.2rem;
             }
-            .hero-desc {
-                font-size: 0.9rem;
+            .subtitle {
+                font-size: 0.95rem;
             }
-            .rows-container {
-                padding: 0 16px 30px;
+            .btn-primary {
+                padding: 14px 28px;
+                font-size: 0.95rem;
+            }
+            .btn-secondary {
+                padding: 14px 24px;
+                font-size: 0.9rem;
             }
             .header {
                 padding: 12px 16px;
             }
-            .header-nav {
+            .logo {
+                font-size: 1.1rem;
+            }
+            .header-btn span {
                 display: none;
             }
-            .logo {
-                font-size: 1.2rem;
+            .stats {
+                gap: 24px;
             }
-            .movie-card {
-                flex: 0 0 140px;
-            }
-            .loading-card {
-                flex: 0 0 140px;
-            }
-            .row-title {
-                font-size: 1rem;
+            .stat-number {
+                font-size: 1.5rem;
             }
         }
 
         @media (max-width: 480px) {
-            .hero-title {
+            .main-title {
                 font-size: 1.8rem;
             }
-            .hero {
-                padding: 0 16px;
-                height: 50vh;
-                min-height: 350px;
+            .features {
+                gap: 8px;
             }
-            .movie-card {
-                flex: 0 0 120px;
+            .feature-chip {
+                font-size: 0.7rem;
+                padding: 6px 12px;
             }
-            .loading-card {
-                flex: 0 0 120px;
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
             }
-            .btn-hero {
-                padding: 10px 20px;
-                font-size: 0.85rem;
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
 </head>
 <body>
 
+<!-- ============ BACKGROUND SLIDER ============ -->
+<div class="bg-slider" id="bgSlider">
+    <!-- Filmlardan olingan rasmlar (Google Images dan) -->
+    <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200');"></div>
+    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200');"></div>
+    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1531259683007-016a7b628fc3?w=1200');"></div>
+    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1595769816263-7b76f3a5a793?w=1200');"></div>
+    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=1200');"></div>
+</div>
+
+<!-- ============ PARTICLES ============ -->
+<div class="particles" id="particles"></div>
+
 <!-- ============ HEADER ============ -->
-<header class="header" id="header">
+<header class="header">
     <a href="/" class="logo">
         <i class="fas fa-play-circle"></i>
-        KinoTop
+        <span>KinoTop</span>
     </a>
-    <nav class="header-nav">
-        <a href="#" class="active">Bosh sahifa</a>
-        <a href="#">Filmlar</a>
-        <a href="#">Shortslar</a>
-        <a href="#">Seriallar</a>
-        <a href="#">Yangiliklar</a>
-    </nav>
-    <div class="header-actions">
-        <span class="search-btn"><i class="fas fa-search"></i></span>
-        <a href="/admin" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.9rem;">
+    <div class="header-btns">
+        <a href="/admin" class="header-btn">
             <i class="fas fa-cog"></i>
+            <span>Admin</span>
         </a>
-        <div class="avatar">👤</div>
+        <a href="https://t.me/Kodlikino_topbot" target="_blank" class="header-btn header-btn-primary">
+            <i class="fab fa-telegram-plane"></i>
+            <span>Telegram</span>
+        </a>
     </div>
 </header>
 
-<!-- ============ HERO BANNER ============ -->
-<div class="hero" id="hero">
-    <div class="hero-bg" id="heroBg" style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200');"></div>
-    <div class="hero-content">
-        <div class="hero-badge">🌟 Trending</div>
-        <h1 class="hero-title" id="heroTitle">KinoTop</h1>
-        <p class="hero-desc" id="heroDesc">Eng sara filmlar va shortslar. Admin tomonidan qo'shilgan barcha kontentlar shu yerda!</p>
-        <div class="hero-buttons">
-            <a href="https://t.me/Kodlikino_topbot?start=dowland" target="_blank" class="btn-hero btn-hero-primary">
-                <i class="fas fa-download"></i> Dasturni o'rnatish
-            </a>
-            <button class="btn-hero btn-hero-secondary" onclick="scrollToRows()">
-                <i class="fas fa-play"></i> Ko'rish
-            </button>
-        </div>
-        <div class="hero-meta">
-            <span><i class="fas fa-film"></i> <span id="totalMovies">0</span> ta video</span>
-            <span><i class="fas fa-clock"></i> Yangilangan: <span id="lastUpdated">hozir</span></span>
-        </div>
-    </div>
-</div>
+<!-- ============ MAIN CONTENT ============ -->
+<main class="overlay-content">
+    <div class="main-content">
 
-<!-- ============ ROWS CONTAINER ============ -->
-<div class="rows-container" id="rowsContainer">
-    <!-- Kategoriyalar dinamik ravishda yuklanadi -->
-</div>
+        <!-- Badge -->
+        <div class="badge">
+            <i class="fas fa-circle"></i>
+            Bepul va cheksiz
+        </div>
+
+        <!-- Title -->
+        <h1 class="main-title">
+            KinoTop platformasiga<br>
+            <span class="highlight">Xush kelibsiz!</span>
+            <br>
+            <span class="highlight-2">🎬</span>
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="subtitle">
+            <strong>📱 KinoTop</strong> — eng sara va qiziqarli premyeralar, 
+            <strong>filmlar</strong> va <strong>shortslar</strong>ni 
+            <strong>bepul</strong> va <strong>qulay</strong> tomosha qiling!
+            <br><br>
+            🌟 <strong>Yangi</strong> va <strong>qiziqarli</strong> kontentlar 
+            har kuni qo'shiladi!
+        </p>
+
+        <!-- Features -->
+        <div class="features">
+            <span class="feature-chip">
+                <i class="fas fa-film"></i> Filmlar
+            </span>
+            <span class="feature-chip">
+                <i class="fas fa-play-circle"></i> Shortslar
+            </span>
+            <span class="feature-chip">
+                <i class="fas fa-tv"></i> Seriallar
+            </span>
+            <span class="feature-chip">
+                <i class="fas fa-star"></i> Premyeralar
+            </span>
+            <span class="feature-chip">
+                <i class="fas fa-infinity"></i> Cheksiz
+            </span>
+            <span class="feature-chip">
+                <i class="fas fa-wifi"></i> Yuqori sifat
+            </span>
+        </div>
+
+        <!-- Buttons -->
+        <div class="btn-group">
+            <a href="https://t.me/Kodlikino_topbot?start=dowland" target="_blank" class="btn-primary">
+                <i class="fas fa-download"></i>
+                <span>📱 Dasturni yuklab olish</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+            <a href="/shorts" class="btn-secondary">
+                <i class="fas fa-play"></i>
+                Shortslarni ko'rish
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number">5000+</div>
+                <div class="stat-label">Filmlar va shortslar</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1M+</div>
+                <div class="stat-label">Tomoshabinlar</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">⭐ 4.9</div>
+                <div class="stat-label">Foydalanuvchi reytingi</div>
+            </div>
+        </div>
+
+    </div>
+</main>
 
 <script>
-    // ============ ADMIN TOMONIDAN QO'SHILGAN VIDEOLAR ============
-    // Bu ma'lumotlar serverdan /api/shorts yoki /api/movies dan keladi
-    // Admin panel orqali qo'shilgan barcha videolar shu yerda
-    
-    const videosData = [
-        // ===== BU YERGA ADMIN QO'SHGAN VIDEOLAR KELADI =====
-        // Har bir video quyidagi formatda bo'lishi kerak:
-        {
-            id: 1,
-            title: "Trend Short 🔥",
-            description: "Eng qiziqarli short video",
-            url: "https://drive.google.com/uc?export=download&id=1ABC123xyz456", // Google Drive URL
-            // yoki YouTube embed:
-            // url: "https://www.youtube.com/embed/VIDEO_ID",
-            thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400",
-            category: "trend", // trend, film, short, serial, comedy, action, drama
-            views: "1.2M",
-            duration: "0:45",
-            date: "2026-01-15"
-        },
-        {
-            id: 2,
-            title: "Film parchalari 🎬",
-            description: "Ajoyib film sahnalari",
-            url: "https://drive.google.com/uc?export=download&id=2DEF456uvw789",
-            thumbnail: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400",
-            category: "film",
-            views: "856K",
-            duration: "1:20",
-            date: "2026-01-14"
-        },
-        {
-            id: 3,
-            title: "Komediya short 😂",
-            description: "Kulgu bilan to'la",
-            url: "https://drive.google.com/uc?export=download&id=3GHI789xyz012",
-            thumbnail: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400",
-            category: "comedy",
-            views: "2.1M",
-            duration: "0:30",
-            date: "2026-01-13"
-        },
-        {
-            id: 4,
-            title: "Aksion sahnasi 💥",
-            description: "Jangarri lahzalar",
-            url: "https://drive.google.com/uc?export=download&id=4JKL012abc345",
-            thumbnail: "https://images.unsplash.com/photo-1531259683007-016a7b628fc3?w=400",
-            category: "action",
-            views: "1.5M",
-            duration: "0:55",
-            date: "2026-01-12"
-        },
-        {
-            id: 5,
-            title: "Drama 🎭",
-            description: "His-tuyg'ularga boy",
-            url: "https://drive.google.com/uc?export=download&id=5MNO345def678",
-            thumbnail: "https://images.unsplash.com/photo-1595769816263-7b76f3a5a793?w=400",
-            category: "drama",
-            views: "678K",
-            duration: "1:10",
-            date: "2026-01-11"
-        },
-        {
-            id: 6,
-            title: "Yangi trend 🔥",
-            description: "Eng so'nggi trend",
-            url: "https://drive.google.com/uc?export=download&id=6PQR678ghi901",
-            thumbnail: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400",
-            category: "trend",
-            views: "3.4M",
-            duration: "0:40",
-            date: "2026-01-10"
-        },
-        {
-            id: 7,
-            title: "Serial parchalari 📺",
-            description: "Mashhur serialdan",
-            url: "https://drive.google.com/uc?export=download&id=7STU901jkl234",
-            thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400",
-            category: "serial",
-            views: "923K",
-            duration: "1:30",
-            date: "2026-01-09"
-        },
-        {
-            id: 8,
-            title: "Kulgi terapiyasi 😂",
-            description: "Kulgili video",
-            url: "https://drive.google.com/uc?export=download&id=8VWX234mno567",
-            thumbnail: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400",
-            category: "comedy",
-            views: "1.8M",
-            duration: "0:25",
-            date: "2026-01-08"
-        }
-    ];
+    // ============ BACKGROUND SLIDER ============
+    const slides = document.querySelectorAll('.bg-slider .slide');
+    let currentSlide = 0;
 
-    // ============ KATEGORIYALAR ============
-    const categories = [
-        { id: 'all', label: '🔥 Barchasi', icon: 'fa-fire' },
-        { id: 'trend', label: '📈 Trend', icon: 'fa-chart-line' },
-        { id: 'film', label: '🎬 Filmlar', icon: 'fa-film' },
-        { id: 'short', label: '📱 Shortslar', icon: 'fa-play-circle' },
-        { id: 'serial', label: '📺 Seriallar', icon: 'fa-tv' },
-        { id: 'comedy', label: '😂 Komediya', icon: 'fa-face-smile' },
-        { id: 'action', label: '💥 Aksiya', icon: 'fa-bolt' },
-        { id: 'drama', label: '🎭 Drama', icon: 'fa-masks-theater' }
-    ];
-
-    // ============ DOM ELEMENTLARI ============
-    const rowsContainer = document.getElementById('rowsContainer');
-    const heroTitle = document.getElementById('heroTitle');
-    const heroDesc = document.getElementById('heroDesc');
-    const totalMovies = document.getElementById('totalMovies');
-
-    // ============ FUNKSIYALAR ============
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+    function nextSlide() {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add('active');
     }
 
-    function getVideoUrl(url) {
-        // Google Drive URL ni to'g'rilash
-        if (url.includes('drive.google.com')) {
-            // Agar Google Drive havolasi bo'lsa
-            const match = url.match(/[?&]id=([^&]+)/);
-            if (match) {
-                return `https://drive.google.com/uc?export=download&id=${match[1]}`;
-            }
-            // Agar file/d/ formatida bo'lsa
-            const match2 = url.match(/\/d\/([^\/]+)/);
-            if (match2) {
-                return `https://drive.google.com/uc?export=download&id=${match2[1]}`;
-            }
-        }
-        return url;
+    setInterval(nextSlide, 5000);
+
+    // ============ PARTICLES ============
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.width = (Math.random() * 3 + 2) + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
+        particle.style.animationDelay = (Math.random() * 20) + 's';
+        particle.style.opacity = Math.random() * 0.5 + 0.1;
+        particlesContainer.appendChild(particle);
     }
 
-    function getThumbnail(video) {
-        if (video.thumbnail) return video.thumbnail;
-        // Agar thumbnail bo'lmasa, YouTube dan olish
-        if (video.url && video.url.includes('youtube.com/embed/')) {
-            const id = video.url.split('/embed/')[1]?.split('?')[0];
-            if (id) return `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
-        }
-        return 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400';
-    }
-
-    function renderHero() {
-        // Eng ko'p ko'rilgan videoni hero qilib qo'yish
-        const sorted = [...videosData].sort((a, b) => {
-            const viewsA = parseInt(a.views?.replace(/[^0-9]/g, '') || 0);
-            const viewsB = parseInt(b.views?.replace(/[^0-9]/g, '') || 0);
-            return viewsB - viewsA;
-        });
+    // ============ MOUSE PARALLAX ============
+    document.addEventListener('mousemove', (e) => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 10;
+        const y = (e.clientY / window.innerHeight - 0.5) * 10;
         
-        const topVideo = sorted[0];
-        if (topVideo) {
-            heroTitle.textContent = topVideo.title || 'KinoTop';
-            heroDesc.textContent = topVideo.description || 'Eng sara filmlar va shortslar';
-            const bg = document.getElementById('heroBg');
-            if (topVideo.thumbnail) {
-                bg.style.backgroundImage = `url(${topVideo.thumbnail})`;
-            }
-        }
-        
-        totalMovies.textContent = videosData.length;
-    }
-
-    function renderRows() {
-        rowsContainer.innerHTML = '';
-
-        // "Barchasi" kategoriyasi
-        renderRow('all', '🔥 Barchasi', videosData);
-
-        // Har bir kategoriya bo'yicha
-        categories.forEach(cat => {
-            if (cat.id === 'all') return;
-            const filtered = videosData.filter(v => v.category === cat.id);
-            if (filtered.length > 0) {
-                renderRow(cat.id, cat.label, filtered);
-            }
-        });
-
-        // Agar video bo'lmasa
-        if (videosData.length === 0) {
-            rowsContainer.innerHTML = `
-                <div class="empty-state" style="padding:80px 20px;">
-                    <i class="fas fa-video-slash"></i>
-                    <h3>Video topilmadi</h3>
-                    <p>Admin panel orqali videolarni qo'shing!</p>
-                    <a href="/admin" style="display:inline-block;margin-top:16px;padding:12px 28px;background:#e50914;color:white;border-radius:6px;text-decoration:none;font-weight:600;">
-                        <i class="fas fa-plus"></i> Admin panel
-                    </a>
-                </div>
-            `;
-        }
-    }
-
-    function renderRow(categoryId, title, videos) {
-        if (!videos || videos.length === 0) return;
-
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'row';
-
-        rowDiv.innerHTML = `
-            <div class="row-header">
-                <h2 class="row-title">${escapeHtml(title)}</h2>
-                <a href="#" class="row-view-all" onclick="scrollRow('${categoryId}')">
-                    Hammasini ko'rish <i class="fas fa-chevron-right"></i>
-                </a>
-            </div>
-            <div class="row-scroll" id="row-${categoryId}">
-                ${videos.map(video => `
-                    <div class="movie-card" onclick="playVideo('${video.id}')" data-url="${escapeHtml(video.url)}">
-                        <img src="${getThumbnail(video)}" alt="${escapeHtml(video.title)}" loading="lazy">
-                        <div class="card-play"><i class="fas fa-play"></i></div>
-                        <div class="card-overlay">
-                            <div class="card-title">${escapeHtml(video.title)}</div>
-                            <div class="card-meta">
-                                <span><i class="fas fa-eye"></i> ${video.views || '0'}</span>
-                                <span>•</span>
-                                <span><i class="fas fa-clock"></i> ${video.duration || '0:30'}</span>
-                            </div>
-                        </div>
-                        ${video.category === 'trend' ? '<div class="card-badge">🔥</div>' : ''}
-                    </div>
-                `).join('')}
-            </div>
-        `;
-
-        rowsContainer.appendChild(rowDiv);
-    }
-
-    // ============ VIDEO O'YNATISH ============
-    function playVideo(id) {
-        const video = videosData.find(v => v.id == id);
-        if (!video) {
-            alert('❌ Video topilmadi!');
-            return;
-        }
-
-        if (!video.url) {
-            alert('❌ Video URL topilmadi!');
-            return;
-        }
-
-        const videoUrl = getVideoUrl(video.url);
-        
-        // Video player sahifasiga o'tish yoki to'g'ridan-to'g'ri ochish
-        // 1-usul: Yangi oynada ochish
-        window.open(videoUrl, '_blank');
-        
-        // 2-usul: Modal player ochish (quyidagi funksiya)
-        // openVideoModal(video);
-    }
-
-    // ============ VIDEO MODAL PLAYER ============
-    function openVideoModal(video) {
-        // Modal player yaratish
-        const modal = document.createElement('div');
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        `;
-
-        modal.innerHTML = `
-            <div style="position:relative;width:100%;max-width:800px;">
-                <button onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:-50px;right:0;background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;padding:10px;">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;background:#000;">
-                    <iframe 
-                        src="${getVideoUrl(video.url)}" 
-                        style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
-                        allow="autoplay; encrypted-media; fullscreen"
-                        allowfullscreen
-                        frameborder="0"
-                    ></iframe>
-                </div>
-                <div style="margin-top:16px;color:white;">
-                    <h3 style="font-size:1.2rem;">${escapeHtml(video.title)}</h3>
-                    <p style="color:rgba(255,255,255,0.6);font-size:0.9rem;">${escapeHtml(video.description || '')}</p>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        // Escape tugmasi bilan yopish
-        const closeModal = (e) => {
-            if (e.key === 'Escape') {
-                modal.remove();
-                document.removeEventListener('keydown', closeModal);
-            }
-        };
-        document.addEventListener('keydown', closeModal);
-
-        // Modalni bosib yopish
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.remove();
-                document.removeEventListener('keydown', closeModal);
-            }
-        });
-    }
-
-    // ============ SKROLL FUNKSIYASI ============
-    function scrollRow(categoryId) {
-        const row = document.getElementById(`row-${categoryId}`);
-        if (row) {
-            row.scrollBy({ left: 300, behavior: 'smooth' });
-        }
-    }
-
-    function scrollToRows() {
-        document.querySelector('.rows-container').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // ============ HEADER SCROLL EFFEKT ============
-    window.addEventListener('scroll', () => {
-        const header = document.getElementById('header');
-        if (window.scrollY > 50) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
-        }
+        document.querySelector('.bg-slider').style.transform = 
+            `translate(${x * 0.5}px, ${y * 0.5}px)`;
     });
 
-    // ============ SERVERDAN MA'LUMOT OLISH ============
-    async function loadVideosFromServer() {
-        try {
-            const response = await fetch('/api/shorts');
-            if (response.ok) {
-                const data = await response.json();
-                if (data && data.length > 0) {
-                    // Serverdan kelgan ma'lumotlarni qo'shish
-                    data.forEach(video => {
-                        // Agar video allaqachon mavjud bo'lmasa
-                        if (!videosData.find(v => v.id === video.id)) {
-                            videosData.push({
-                                id: video.id || Date.now() + Math.random(),
-                                title: video.sarlavha || video.title || 'Video',
-                                description: video.tafsilot || video.description || '',
-                                url: video.embed_url || video.url || '',
-                                thumbnail: video.thumbnail || '',
-                                category: video.category || 'short',
-                                views: video.views || '0',
-                                duration: video.duration || '0:30',
-                                date: video.date || new Date().toISOString().split('T')[0]
-                            });
-                        }
-                    });
-                }
+    // ============ SCROLL ANIMATION ============
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
             }
-        } catch (error) {
-            console.log('Serverdan yuklashda xatolik:', error);
-        }
-    }
-
-    // ============ DASTURNI ISHGA TUSHIRISH ============
-    async function initApp() {
-        // Serverdan ma'lumot olish (agar mavjud bo'lsa)
-        await loadVideosFromServer();
-        
-        // Sahifani render qilish
-        renderHero();
-        renderRows();
-        
-        console.log(`🎬 KinoTop yuklandi! Jami: ${videosData.length} ta video`);
-        console.log('📊 Kategoriyalar:', categories.map(c => c.label).join(', '));
-    }
-
-    // Sahifa yuklanganda ishga tushirish
-    document.addEventListener('DOMContentLoaded', initApp);
-
-    // ============ ADMIN PANEL UCHUN QO'SHIMCHA ============
-    // Admin panelda video qo'shganda bu funksiya ishlatiladi
-    function addVideo(video) {
-        videosData.push({
-            id: video.id || Date.now(),
-            title: video.title || 'Yangi video',
-            description: video.description || '',
-            url: video.url || '',
-            thumbnail: video.thumbnail || '',
-            category: video.category || 'short',
-            views: video.views || '0',
-            duration: video.duration || '0:30',
-            date: new Date().toISOString().split('T')[0]
         });
-        renderHero();
-        renderRows();
-    }
+    }, observerOptions);
 
-    // Global funksiyalarni ochiq qilish
-    window.playVideo = playVideo;
-    window.openVideoModal = openVideoModal;
-    window.scrollRow = scrollRow;
-    window.scrollToRows = scrollToRows;
-    window.addVideo = addVideo;
+    document.querySelectorAll('.badge, .main-title, .subtitle, .features, .btn-group, .stats')
+        .forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.8s ease';
+            observer.observe(el);
+        });
+
+    // ============ CONSOLE ============
+    console.log('🎬 KinoTop platformasiga xush kelibsiz!');
+    console.log('📱 Dasturni yuklab olish: https://t.me/Kodlikino_topbot?start=dowland');
+    console.log('⭐ Eng sara filmlar va shortslar sizni kutmoqda!');
 </script>
 </body>
 </html>
